@@ -19,7 +19,7 @@ class AJsUtilities(tk.Tk):
         tk.Tk.__init__(self, *args, **kwargs)
 
         tk.Tk.iconbitmap(self, default="A.ico")
-        tk.Tk.wm_title(self, "Aaron's Utilities V0.5.1")
+        tk.Tk.wm_title(self, "Aaron's Utilities V0.6")
         
         container = tk.Frame(self,bg='#262626')
         container.pack(side="top", fill="both", expand = True)
@@ -28,7 +28,7 @@ class AJsUtilities(tk.Tk):
 
         self.frames = {}
 
-        for F in (WelcomeScreen,AJsUtilitiesButtons,FirewallOptions, NetworkTests): 
+        for F in (WelcomeScreen,AJsUtilitiesButtons,FirewallOptions, NetworkTests,PowerOptions): 
             frame = F(container, self) 
             self.frames[F] = frame  
             frame.grid(row=0,column=0,sticky="nsew")
@@ -70,6 +70,9 @@ class AJsUtilitiesButtons(tk.Frame):
 
         pingTesting = tk.Button(self, text="Connection Tests",width=26, height=5, font=LARGE_FONT, padx=5,pady=5, bg='#b3001b', fg='white',command=lambda: controller.show_frame(NetworkTests))
         pingTesting.grid(row=0,column=1,padx=12,pady=5)
+
+        powerOption = tk.Button(self, text="Power Options",width=26, height=5, font=LARGE_FONT, padx=5,pady=5, bg='#b3001b', fg='white',command=lambda: controller.show_frame(PowerOptions))
+        powerOption.grid(row=1,column=0,padx=12,pady=5)
 
 
 ##################################### Class for the firewall activation and deactivation #####################################################
@@ -171,12 +174,6 @@ class NetworkTests(tk.Frame):
     ######## Functions for the button commands ############
     ### Function for pinging a certain IP or domain 
     def pingOtherComp(self):
-        #### Gets Username
-        any_user = 'echo %username% > C:\\Users\\Public\\user.txt'
-        os.system(any_user)
-        with open('C:\\Users\\Public\\user.txt', 'r') as username:
-            for name in username:
-                main_name = name[0:len(name)-2]
 
         #### Gets IP Information
         pingIP = self.PingAdd.get()
@@ -189,20 +186,12 @@ class NetworkTests(tk.Frame):
         pingResults.close()
 
         #### Clean up text files by deleting them
-        user_clean = 'DEL ' + 'C:\\Users\\Public\\user.txt'
         ping_clean = 'DEL ' + 'C:\\Users\\Public\\ping.txt'
 
-        os.system(user_clean)
         os.system(ping_clean)
 
     ### Basic one button that calls google.com to see if it can get signal
     def internetTest(self):
-        #### Gets Username
-        any_user = 'echo %username% > C:\\Users\\Public\\user.txt'
-        os.system(any_user)
-        with open('C:\\Users\\Public\\user.txt', 'r') as username:
-            for name in username:
-                main_name = name[0:len(name)-2]
 
         #### Gets IP Information
         os.system('ping www.google.com> "C:\\Users\\Public\\ping.txt"')
@@ -214,11 +203,87 @@ class NetworkTests(tk.Frame):
         pingResults.close()
 
         #### Clean up text files by deleting them
-        user_clean = 'DEL ' + 'C:\\Users\\Public\\user.txt'
         ping_clean = 'DEL ' + 'C:\\Users\\Public\\ping.txt'
 
-        os.system(user_clean)
         os.system(ping_clean)
+
+###################################### Class for choosing a power plan ##############################################################
+class PowerOptions(tk.Frame):
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self,parent)
+
+        powersaver = tk.Button(self,text="Power Saver...",width=26, height=5, font=LARGE_FONT, padx=5,pady=5,bg='#b3001b', fg='white',wraplength=200, command=self.powerSaver)
+        powersaver.grid(row=0,column=0,padx=12,pady=5)
+
+        balanced = tk.Button(self,text="Balanced Power.",width=26, height=5, font=LARGE_FONT, padx=5,pady=5,bg='#b3001b', fg='white',wraplength=200, command=self.balPow)
+        balanced.grid(row=0,column=1,padx=12,pady=5)
+
+        high = tk.Button(self,text="High Performance!",width=26, height=5, font=LARGE_FONT, padx=5,pady=5,bg='#b3001b', fg='white',wraplength=200, command=self.highPow)
+        high.grid(row=1,column=0,padx=12,pady=5)
+
+        ultimate = tk.Button(self,text="ULTIMATE PERFORMANCE!!!",width=26, height=5, font=LARGE_FONT, padx=5,pady=5,bg='#b3001b', fg='white',wraplength=200, command=self.ultPow)
+        ultimate.grid(row=1,column=1,padx=12,pady=5)
+
+        returnButton = tk.Button(self,text="Back to Options",width=26, height=5, font=MEDIUM_FONT, padx=5,pady=5,bg='#b3001b', fg='white', wraplength=200, command=lambda: controller.show_frame(AJsUtilitiesButtons))
+        returnButton.grid(row=7,column=0,padx=12,pady=5)
+
+    ##################### Functions to go with the buttons #########################
+    #Enable PowerSaver
+    def powerSaver(self):
+        os.system('powercfg /l> "C:\\Users\\Public\\poweroptions.txt"')
+        with open('C:\\Users\\Public\\poweroptions.txt', 'r') as powerfind:
+            for option in powerfind:
+                if "Power saver" in option:
+                    key_seg = option[19:55]
+
+        new_cmd = 'powercfg /s ' + key_seg
+        power_clean = 'DEL ' + 'C:\\Users\\Public\\poweroptions.txt'
+
+        os.system(power_clean)
+        os.system(new_cmd)
+
+    #Enable Balanced Power
+    def balPow(self):
+        os.system('powercfg /l> "C:\\Users\\Public\\poweroptions.txt"')
+        with open('C:\\Users\\Public\\poweroptions.txt', 'r') as powerfind:
+            for option in powerfind:
+                if "Balanced" in option:
+                    key_seg = option[19:55]
+
+        new_cmd = 'powercfg /s ' + key_seg
+        power_clean = 'DEL ' + 'C:\\Users\\Public\\poweroptions.txt'
+
+        os.system(power_clean)
+        os.system(new_cmd)
+
+    #Enable High Performance
+    def highPow(self):
+        os.system('powercfg /l> "C:\\Users\\Public\\poweroptions.txt"')
+        with open('C:\\Users\\Public\\poweroptions.txt', 'r') as powerfind:
+            for option in powerfind:
+                if "High" in option:
+                    key_seg = option[19:55]
+
+        new_cmd = 'powercfg /s ' + key_seg
+        power_clean = 'DEL ' + 'C:\\Users\\Public\\poweroptions.txt'
+
+        os.system(power_clean)
+        os.system(new_cmd)
+
+    #Enable Ultimate Performance
+    def ultPow(self):
+        os.system('powercfg /l> "C:\\Users\\Public\\poweroptions.txt"')
+        with open('C:\\Users\\Public\\poweroptions.txt', 'r') as powerfind:
+            for option in powerfind:
+                if "Ultimate" in option:
+                    key_seg = option[19:55]
+
+        new_cmd = 'powercfg /s ' + key_seg
+        power_clean = 'DEL ' + 'C:\\Users\\Public\\poweroptions.txt'
+
+        os.system(power_clean)
+        os.system(new_cmd)
+
 
 
 #Continuously has gui up.
