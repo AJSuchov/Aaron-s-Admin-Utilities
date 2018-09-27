@@ -5,6 +5,8 @@ import tkinter.messagebox
 import os
 import win32com.shell.shell as shell
 
+def quit():
+    quit()
 
 ###Fonts###
 LARGE_FONT= ("Verdana", 12)
@@ -16,8 +18,8 @@ class AJsUtilities(tk.Tk):
 
         tk.Tk.__init__(self, *args, **kwargs)
 
-        #tk.Tk.iconbitmap(self, default="something.ico")
-        tk.Tk.wm_title(self, "Aaron's Utilities V0.5")
+        tk.Tk.iconbitmap(self, default="A.ico")
+        tk.Tk.wm_title(self, "Aaron's Utilities V0.5.1")
         
         container = tk.Frame(self,bg='#262626')
         container.pack(side="top", fill="both", expand = True)
