@@ -11,6 +11,7 @@ def quit():
 ###Fonts###
 LARGE_FONT= ("Verdana", 12)
 MEDIUM_FONT= ("Verdana", 9)
+SMALL_FONT= ("Verdana", 7)
 
 ################### This initializes the whole GUI ###################################################
 class AJsUtilities(tk.Tk):
@@ -213,19 +214,27 @@ class PowerOptions(tk.Frame):
         tk.Frame.__init__(self,parent)
 
         powersaver = tk.Button(self,text="Power Saver...",width=26, height=5, font=LARGE_FONT, padx=5,pady=5,bg='#b3001b', fg='white',wraplength=200, command=self.powerSaver)
-        powersaver.grid(row=0,column=0,padx=12,pady=5)
+        powersaver.grid(row=0,column=0,padx=12,pady=(10,5))
+        powerSaveDiscription= tk.Label(self, text="*Saves energy by reducing your computer's performance where possible.", font=SMALL_FONT, wraplength=250)
+        powerSaveDiscription.grid(row=1, column=0, pady=(0,20), sticky='N')
 
         balanced = tk.Button(self,text="Balanced Power.",width=26, height=5, font=LARGE_FONT, padx=5,pady=5,bg='#b3001b', fg='white',wraplength=200, command=self.balPow)
-        balanced.grid(row=0,column=1,padx=12,pady=5)
+        balanced.grid(row=0,column=1,padx=12,pady=(10,5))
+        balancedDiscription= tk.Label(self, text="*Automatically balances performance with energy consumption on capable hardware.", font=SMALL_FONT, wraplength=250)
+        balancedDiscription.grid(row=1, column=1, pady=(0,20), sticky='N')
 
         high = tk.Button(self,text="High Performance!",width=26, height=5, font=LARGE_FONT, padx=5,pady=5,bg='#b3001b', fg='white',wraplength=200, command=self.highPow)
-        high.grid(row=1,column=0,padx=12,pady=5)
-
+        high.grid(row=2,column=0,padx=12,pady=5)
+        highPerDiscription= tk.Label(self, text="*Favors performance, but may use more energy.", font=SMALL_FONT, wraplength=250)
+        highPerDiscription.grid(row=3, column=0, sticky='N')
+        
         ultimate = tk.Button(self,text="ULTIMATE PERFORMANCE!!!",width=26, height=5, font=LARGE_FONT, padx=5,pady=5,bg='#b3001b', fg='white',wraplength=200, command=self.ultPow)
-        ultimate.grid(row=1,column=1,padx=12,pady=5)
-
+        ultimate.grid(row=2,column=1,padx=12,pady=5)
+        ultimateDiscription= tk.Label(self, text="*Provides ultimate performance on higher end PC's.", font=SMALL_FONT, wraplength=250)
+        ultimateDiscription.grid(row=3, column=1, sticky='N')
+        
         returnButton = tk.Button(self,text="Back to Options",width=26, height=5, font=MEDIUM_FONT, padx=5,pady=5,bg='#b3001b', fg='white', wraplength=200, command=lambda: controller.show_frame(AJsUtilitiesButtons))
-        returnButton.grid(row=7,column=0,padx=12,pady=5)
+        returnButton.grid(row=8,column=0,padx=12,pady=(120,50))
 
     ##################### Functions to go with the buttons #########################
     #Enable PowerSaver
