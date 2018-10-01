@@ -4,6 +4,7 @@ from tkinter import ttk
 import tkinter.messagebox
 import os
 import win32com.shell.shell as shell
+import subprocess as sub
 
 def quit():
     quit()
@@ -20,7 +21,7 @@ class AJsUtilities(tk.Tk):
         tk.Tk.__init__(self, *args, **kwargs)
 
         tk.Tk.iconbitmap(self, default="A.ico")
-        tk.Tk.wm_title(self, "Aaron's Utilities V0.6")
+        tk.Tk.wm_title(self, "Aaron's Utilities V0.7")
         
         container = tk.Frame(self,bg='#262626')
         container.pack(side="top", fill="both", expand = True)
@@ -29,7 +30,7 @@ class AJsUtilities(tk.Tk):
 
         self.frames = {}
 
-        for F in (WelcomeScreen,AJsUtilitiesButtons,FirewallOptions, NetworkTests,PowerOptions): 
+        for F in (WelcomeScreen,AJsUtilitiesButtons,FirewallOptions, NetworkTests,PowerOptions, AllowUpdates): 
             frame = F(container, self) 
             self.frames[F] = frame  
             frame.grid(row=0,column=0,sticky="nsew")
@@ -74,6 +75,9 @@ class AJsUtilitiesButtons(tk.Frame):
 
         powerOption = tk.Button(self, text="Power Options",width=26, height=5, font=LARGE_FONT, padx=5,pady=5, bg='#b3001b', fg='white',command=lambda: controller.show_frame(PowerOptions))
         powerOption.grid(row=1,column=0,padx=12,pady=5)
+
+        updates = tk.Button(self, text="Windows Updates",width=26, height=5, font=LARGE_FONT, padx=5,pady=5, bg='#b3001b', fg='white',command=lambda: controller.show_frame(AllowUpdates))
+        updates.grid(row=2,column=0,padx=12,pady=5)
 
 
 ##################################### Class for the firewall activation and deactivation #####################################################
@@ -293,6 +297,35 @@ class PowerOptions(tk.Frame):
         os.system(power_clean)
         os.system(new_cmd)
 
+###################################### Windows Updater ##############################################################
+class AllowUpdates(tk.Frame):
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self,parent)
+
+        installUpdates = tk.Button(self, text="Install Updates", command=self.update,width=26, height=5, font=LARGE_FONT, padx=5,pady=5,bg='#b3001b', fg='white',wraplength=200)
+        installUpdates.grid(row=0, column=0)
+
+        testButton = tk.Button(self, text="Test Button", command=self.setUpdateAuto,width=26, height=5, font=LARGE_FONT, padx=5,pady=5,bg='#b3001b', fg='white',wraplength=200)
+        testButton.grid(row=0, column=1)
+
+        returnButton = tk.Button(self,text="Back to Options",width=26, height=5, font=MEDIUM_FONT, padx=5,pady=5,bg='#b3001b', fg='white', wraplength=200, command=lambda: controller.show_frame(AJsUtilitiesButtons))
+        returnButton.grid(row=8,column=0,padx=12,pady=(120,50))
+
+    def update(self):
+        #os.system('powershell "(New-Object -ComObject Microsoft.Update.AutoUpdate).DetectNow()"')
+        shell.ShellExecuteEx(lpVerb='runas', lpFile='cmd.exe', lpParameters='/c' + '''powershell Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force
+& powershell Install-Module PSWindowsUpdate -Force
+& powershell Set-ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
+& powershell Import-Module PSWindowsUpdate
+& powershell Add-WUServiceManager -ServiceID 7971f918-a847-4430-9279-4a52d1efe18d -Confirm:$false
+& powershell Install-WindowsUpdate -AcceptAll -MicrosoftUpdate -AutoReboot''')
+
+    def AllowAutoUpdate(self):
+        shell.ShellExecuteEx(lpVerb='runas', lpFile='cmd.exe', lpParameters='/c' + ' reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Auto Update" /v AUOptions /t REG_DWORD /d 0 /f')
+        shell.ShellExecuteEx(lpVerb='runas', lpFile='cmd.exe', lpParameters='/c' + 'powershell Import-Module PSWindowsUpdate"')
+        
+    def setUpdateAuto(self):
+        shell.ShellExecuteEx(lpVerb='runas', lpFile='cmd.exe', lpParameters='/c' + 'echo %cd%> "C:\\Users\\Public\\ping.txt" & echo "This is working"> "C:\\Users\\Public\\ping.txt"')        
 
 
 #Continuously has gui up.
