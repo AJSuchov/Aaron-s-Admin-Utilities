@@ -2,9 +2,10 @@ import tkinter as tk
 from tkinter import *
 from tkinter import ttk
 import tkinter.messagebox
-import os
+import os, time, threading
 import win32com.shell.shell as shell
 import subprocess as sub
+
 
 def quit():
     quit()
@@ -21,7 +22,7 @@ class AJsUtilities(tk.Tk):
         tk.Tk.__init__(self, *args, **kwargs)
 
         tk.Tk.iconbitmap(self, default="A.ico")
-        tk.Tk.wm_title(self, "Aaron's Utilities V0.7")
+        tk.Tk.wm_title(self, "Aaron's Utilities V0.8.1")
         
         container = tk.Frame(self,bg='#262626')
         container.pack(side="top", fill="both", expand = True)
@@ -30,7 +31,7 @@ class AJsUtilities(tk.Tk):
 
         self.frames = {}
 
-        for F in (WelcomeScreen,AJsUtilitiesButtons,FirewallOptions, NetworkTests,PowerOptions, AllowUpdates): 
+        for F in (WelcomeScreen,AJsUtilitiesButtons,FirewallOptions, NetworkTests,PowerOptions, AllowUpdates, IPConfig): 
             frame = F(container, self) 
             self.frames[F] = frame  
             frame.grid(row=0,column=0,sticky="nsew")
@@ -75,6 +76,9 @@ class AJsUtilitiesButtons(tk.Frame):
 
         powerOption = tk.Button(self, text="Power Options",width=26, height=5, font=LARGE_FONT, padx=5,pady=5, bg='#b3001b', fg='white',command=lambda: controller.show_frame(PowerOptions))
         powerOption.grid(row=1,column=0,padx=12,pady=5)
+
+        ipconfig = tk.Button(self, text="Get IP's", width=26, height=5, font=LARGE_FONT, padx=5,pady=5, bg='#b3001b', fg='white',command=lambda: controller.show_frame(IPConfig))
+        ipconfig.grid(row=1,column=1,padx=12,pady=5)
 
         updates = tk.Button(self, text="Windows Updates",width=26, height=5, font=LARGE_FONT, padx=5,pady=5, bg='#b3001b', fg='white',command=lambda: controller.show_frame(AllowUpdates))
         updates.grid(row=2,column=0,padx=12,pady=5)
@@ -303,30 +307,82 @@ class AllowUpdates(tk.Frame):
         tk.Frame.__init__(self,parent)
 
         installUpdates = tk.Button(self, text="Install Updates", command=self.update,width=26, height=5, font=LARGE_FONT, padx=5,pady=5,bg='#b3001b', fg='white',wraplength=200)
-        installUpdates.grid(row=0, column=0)
+        installUpdates.grid(row=0, column=0, padx=12,pady=(10,5))
 
-        testButton = tk.Button(self, text="Test Button", command=self.setUpdateAuto,width=26, height=5, font=LARGE_FONT, padx=5,pady=5,bg='#b3001b', fg='white',wraplength=200)
-        testButton.grid(row=0, column=1)
+        AllowUpdate = tk.Button(self, text="Enable Automatic Updates", command=self.AllowUpdates,width=26, height=5, font=LARGE_FONT, padx=5,pady=5,bg='#b3001b', fg='white',wraplength=200)
+        AllowUpdate.grid(row=0, column=1, padx=12,pady=(10,5))
+
+        DenyUpdate = tk.Button(self, text="Disable Automatic Updates", command=self.DenyUpdateAuto,width=26, height=5, font=LARGE_FONT, padx=5,pady=5,bg='#b3001b', fg='white',wraplength=200)
+        DenyUpdate.grid(row=1, column=0, padx=12,pady=5)
+
+        UpdateAndInst = tk.Button(self, text="Enable Updates and Install Updates", command=self.AllowAndUpdate,width=26, height=5, font=LARGE_FONT, padx=5,pady=5,bg='#b3001b', fg='white',wraplength=200)
+        UpdateAndInst.grid(row=1, column=1, padx=12,pady=5)
 
         returnButton = tk.Button(self,text="Back to Options",width=26, height=5, font=MEDIUM_FONT, padx=5,pady=5,bg='#b3001b', fg='white', wraplength=200, command=lambda: controller.show_frame(AJsUtilitiesButtons))
         returnButton.grid(row=8,column=0,padx=12,pady=(120,50))
 
+    ##################### Functions to go with the buttons #########################
     def update(self):
-        #os.system('powershell "(New-Object -ComObject Microsoft.Update.AutoUpdate).DetectNow()"')
-        shell.ShellExecuteEx(lpVerb='runas', lpFile='cmd.exe', lpParameters='/c' + '''powershell Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force
-& powershell Install-Module PSWindowsUpdate -Force
-& powershell Set-ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
-& powershell Import-Module PSWindowsUpdate
-& powershell Add-WUServiceManager -ServiceID 7971f918-a847-4430-9279-4a52d1efe18d -Confirm:$false
-& powershell Install-WindowsUpdate -AcceptAll -MicrosoftUpdate -AutoReboot''')
+        tk.messagebox.showinfo('Auto Update', 'The update process will begin, another notification will be present when this process is complete and/or your computer will automatically restart.')
+        shell.ShellExecuteEx(lpVerb='runas', lpFile='cmd.exe', lpParameters='/c' + 'powershell Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force; Install-Module PSWindowsUpdate -Force; Set-ExecutionPolicy RemoteSigned -Scope CurrentUser -Force; Import-Module PSWindowsUpdate; Add-WUServiceManager -ServiceID 7971f918-a847-4430-9279-4a52d1efe18d -Confirm:$false; Install-WindowsUpdate -AcceptAll -MicrosoftUpdate -AutoReboot')
+##        global checkBoxIndic
+##        checkBoxIndic = False
 
-    def AllowAutoUpdate(self):
-        shell.ShellExecuteEx(lpVerb='runas', lpFile='cmd.exe', lpParameters='/c' + ' reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Auto Update" /v AUOptions /t REG_DWORD /d 0 /f')
-        shell.ShellExecuteEx(lpVerb='runas', lpFile='cmd.exe', lpParameters='/c' + 'powershell Import-Module PSWindowsUpdate"')
+##        def checkBox():
+##            global checkBoxIndic
+##            while(checkBoxIndic):
+##                time.sleep(10)
+##                try:
+##                    with open('C:\\Users\\Public\\Update.txt', 'r') as works:
+##                        for confirmation in works:
+##                            if "Done" in confirmation:
+##                                tk.messagebox.showinfo('Auto Update', 'Updates have concluded, your computer may or may not restart.')
+##                                checkBoxIndic = True
+##                            else:
+##                                print('This file has something wrong')
+##                except:
+##                    print('Test')
+##                    pass
+
+    def AllowUpdates(self):
+        shell.ShellExecuteEx(lpVerb='runas', lpFile='cmd.exe', lpParameters='/c' + 'sc config wuauserv start=auto & reg delete HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU')
         
-    def setUpdateAuto(self):
-        shell.ShellExecuteEx(lpVerb='runas', lpFile='cmd.exe', lpParameters='/c' + 'echo %cd%> "C:\\Users\\Public\\ping.txt" & echo "This is working"> "C:\\Users\\Public\\ping.txt"')        
+    def DenyUpdateAuto(self):
+        shell.ShellExecuteEx(lpVerb='runas', lpFile='cmd.exe', lpParameters='/c' + 'sc config wuauserv start=disabled & reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Auto Update" /v AUOptions /t REG_DWORD /d 1 /f')
 
+    def AllowAndUpdate(self):
+        tk.messagebox.showinfo('Auto Update', 'The update process will begin, another notification will be present when this process is complete and/or your computer will automatically restart.')
+        shell.ShellExecuteEx(lpVerb='runas', lpFile='cmd.exe', lpParameters='/c' + 'sc config wuauserv start=auto & reg delete HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU & powershell Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force; Install-Module PSWindowsUpdate -Force; Set-ExecutionPolicy RemoteSigned -Scope CurrentUser -Force; Import-Module PSWindowsUpdate; Add-WUServiceManager -ServiceID 7971f918-a847-4430-9279-4a52d1efe18d -Confirm:$false; Install-WindowsUpdate -AcceptAll -MicrosoftUpdate -AutoReboot')
+
+################################### IP Config ##################################################################################
+class IPConfig(tk.Frame):
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self,parent)
+
+        GetIP = tk.Button(self, text="Get IP Addresses", command=self.getIP,width=26, height=5, font=LARGE_FONT, padx=5,pady=5,bg='#b3001b', fg='white',wraplength=200)
+        GetIP.grid(row=0, columnspan = 1, pady=(10,5))
+
+        scrollbar = Scrollbar(self, width = 16)
+        scrollbar.grid(row=1, column = 1, pady=(20,20))
+
+        self.resultsIP = tk.Listbox(self, yscrollcommand=scrollbar.set, width=55)
+        self.resultsIP.grid(row=1, column=0, padx=(125,0), pady=(20,20))
+
+        scrollbar.config(command = self.resultsIP.yview)
+
+        returnButton = tk.Button(self,text="Back to Options",width=26, height=5, font=MEDIUM_FONT, padx=5,pady=5,bg='#b3001b', fg='white', wraplength=200, command=lambda: controller.show_frame(AJsUtilitiesButtons))
+        returnButton.grid(row=8,column=0,padx=12,pady=(120,50))
+
+    
+    def getIP(self):
+        os.system('ipconfig> "C:\\Users\\Public\\ips.txt"')
+        with open('C:\\Users\\Public\\ips.txt', 'r') as ipInfo:
+            for line in ipInfo:
+                self.resultsIP.insert(END, line)
+        
+        ip_clean = 'DEL ' + 'C:\\Users\\Public\\poweroptions.txt'
+        os.system(ip_clean)
+        
 
 #Continuously has gui up.
 
