@@ -31,7 +31,7 @@ class AJsUtilities(tk.Tk):
 
         self.frames = {}
 
-        for F in (WelcomeScreen,AJsUtilitiesButtons,FirewallOptions, NetworkTests,PowerOptions, AllowUpdates, IPConfig): 
+        for F in (WelcomeScreen,AJsUtilitiesButtons,FirewallOptions, NetworkTests,PowerOptions, AllowUpdates, IPConfig, MapDrive): 
             frame = F(container, self) 
             self.frames[F] = frame  
             frame.grid(row=0,column=0,sticky="nsew")
@@ -82,6 +82,9 @@ class AJsUtilitiesButtons(tk.Frame):
 
         updates = tk.Button(self, text="Windows Updates",width=26, height=5, font=LARGE_FONT, padx=5,pady=5, bg='#b3001b', fg='white',command=lambda: controller.show_frame(AllowUpdates))
         updates.grid(row=2,column=0,padx=12,pady=5)
+
+        mapDrive = tk.Button(self, text="Map Drives",width=26, height=5, font=LARGE_FONT, padx=5,pady=5, bg='#b3001b', fg='white',command=lambda: controller.show_frame(MapDrive))
+        mapDrive.grid(row=2,column=1,padx=12,pady=5)
 
 
 ##################################### Class for the firewall activation and deactivation #####################################################
@@ -373,7 +376,7 @@ class IPConfig(tk.Frame):
         returnButton = tk.Button(self,text="Back to Options",width=26, height=5, font=MEDIUM_FONT, padx=5,pady=5,bg='#b3001b', fg='white', wraplength=200, command=lambda: controller.show_frame(AJsUtilitiesButtons))
         returnButton.grid(row=8,column=0,padx=12,pady=(0,50),sticky='W')
 
-    
+    ##################### Functions to go with the buttons #########################
     def getIP(self):
         os.system('ipconfig> "C:\\Users\\Public\\ips.txt"')
         with open('C:\\Users\\Public\\ips.txt', 'r') as ipInfo:
@@ -382,7 +385,74 @@ class IPConfig(tk.Frame):
         
         ip_clean = 'DEL ' + 'C:\\Users\\Public\\ips.txt'
         os.system(ip_clean)
+
+
+################################### Map Drives ##################################################################################
+class MapDrive(tk.Frame):
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self,parent)
+
+
+        Test = tk.Button(self, text="Map Drive TEST", command=self.mapDrive,width=26, height=5, font=LARGE_FONT, padx=5,pady=5,bg='#b3001b', fg='white',wraplength=200)
+        Test.grid(row=0, column=0, sticky='E', pady=(10,5), padx=(0,28))
+
+
+        returnButton = tk.Button(self,text="Back to Options",width=26, height=5, font=MEDIUM_FONT, padx=5,pady=5,bg='#b3001b', fg='white', wraplength=200, command=lambda: controller.show_frame(AJsUtilitiesButtons))
+        returnButton.grid(row=8,column=0,padx=12,pady=(120,50))
+
+
+        self.address = tk.Entry(self)
+        self.address.grid(row=1, column=0)
         
+        optionList = MapDrive.listAvailableDrives()
+        self.v = tk.StringVar()
+        self.v.set(optionList[0])
+        self.om = tk.OptionMenu(self,self.v,*optionList)
+        self.om.grid(row=1,column=1)
+
+
+        
+        deleteList = MapDrive.findMappedDrives()
+        self.v1 = tk.StringVar()
+        self.v1.set(deleteList[0])
+        self.om1 = tk.OptionMenu(self,self.v1,*deleteList)
+        self.om1.grid(row=1,column=2)
+        
+
+    def findMappedDrives():
+        os.system('fsutil fsinfo drives> "C:\\Users\\Public\\drives.txt"')
+        findDrives = open('C:\\Users\\Public\\drives.txt', 'r')
+        allDrives = findDrives.read().split(' ')
+        allDrives.remove(allDrives[-1])
+        allDrives.remove(allDrives[0])
+        
+        holder = [] #Holds new list of options
+        for option in allDrives:
+            holder.append(option[0:2])
+
+        return holder
+
+
+        findDrives.close()
+        drive_clean = 'DEL ' + 'C:\\Users\\Public\\drives.txt'
+        os.system(drive_clean)
+
+    def listAvailableDrives():
+        allLetterDrives = ['A:', 'B:', 'C:', 'D:', 'E:', 'F:', 'G:', 'H:', 'I:', 'J:', 'K:', 'L:', 'M:', 'N:', 'O:', 'P:', 'Q:', 'R:', 'S:', 'T:', 'U:', 'V:', 'W:', 'X:', 'Y:', 'Z:']
+
+        holder = MapDrive.findMappedDrives()
+        for x in holder:
+            for y in allLetterDrives:
+                if x == y:
+                    allLetterDrives.remove(y)
+
+        return allLetterDrives
+
+    def mapDrive(self):
+        available = MapDrive.listAvailableDrives()
+        print(available)
+
+    
 
 #Continuously has gui up.
 
