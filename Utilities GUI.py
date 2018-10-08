@@ -22,7 +22,7 @@ class AJsUtilities(tk.Tk):
         tk.Tk.__init__(self, *args, **kwargs)
 
         tk.Tk.iconbitmap(self, default="A.ico")
-        tk.Tk.wm_title(self, "Aaron's Utilities V0.8.1")
+        tk.Tk.wm_title(self, "Aaron's Utilities V0.8.2")
         
         container = tk.Frame(self,bg='#262626')
         container.pack(side="top", fill="both", expand = True)
@@ -360,18 +360,18 @@ class IPConfig(tk.Frame):
         tk.Frame.__init__(self,parent)
 
         GetIP = tk.Button(self, text="Get IP Addresses", command=self.getIP,width=26, height=5, font=LARGE_FONT, padx=5,pady=5,bg='#b3001b', fg='white',wraplength=200)
-        GetIP.grid(row=0, columnspan = 1, pady=(10,5))
+        GetIP.grid(row=0, column=0, sticky='E', pady=(10,5), padx=(0,28))
 
         scrollbar = Scrollbar(self, width = 16)
         scrollbar.grid(row=1, column = 1, pady=(20,20))
 
-        self.resultsIP = tk.Listbox(self, yscrollcommand=scrollbar.set, width=55)
+        self.resultsIP = tk.Listbox(self, yscrollcommand=scrollbar.set, width=55,height=20)
         self.resultsIP.grid(row=1, column=0, padx=(125,0), pady=(20,20))
 
         scrollbar.config(command = self.resultsIP.yview)
 
         returnButton = tk.Button(self,text="Back to Options",width=26, height=5, font=MEDIUM_FONT, padx=5,pady=5,bg='#b3001b', fg='white', wraplength=200, command=lambda: controller.show_frame(AJsUtilitiesButtons))
-        returnButton.grid(row=8,column=0,padx=12,pady=(120,50))
+        returnButton.grid(row=8,column=0,padx=12,pady=(0,50),sticky='W')
 
     
     def getIP(self):
@@ -380,7 +380,7 @@ class IPConfig(tk.Frame):
             for line in ipInfo:
                 self.resultsIP.insert(END, line)
         
-        ip_clean = 'DEL ' + 'C:\\Users\\Public\\poweroptions.txt'
+        ip_clean = 'DEL ' + 'C:\\Users\\Public\\ips.txt'
         os.system(ip_clean)
         
 
