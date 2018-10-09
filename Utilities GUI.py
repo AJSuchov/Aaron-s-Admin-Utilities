@@ -392,33 +392,65 @@ class MapDrive(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self,parent)
 
-
-        Test = tk.Button(self, text="Map Drive TEST", command=self.mapDrive,width=26, height=5, font=LARGE_FONT, padx=5,pady=5,bg='#b3001b', fg='white',wraplength=200)
-        Test.grid(row=0, column=0, sticky='E', pady=(10,5), padx=(0,28))
-
+        description = tk.Label(self, text="Choose to either map a drive or delete a mapped drive.", font=LARGE_FONT, wraplength=600)
+        description.grid(row=0, column=0, columnspan=4, padx = (55,0))
 
         returnButton = tk.Button(self,text="Back to Options",width=26, height=5, font=MEDIUM_FONT, padx=5,pady=5,bg='#b3001b', fg='white', wraplength=200, command=lambda: controller.show_frame(AJsUtilitiesButtons))
         returnButton.grid(row=8,column=0,padx=12,pady=(120,50))
 
-
-        self.address = tk.Entry(self)
-        self.address.grid(row=1, column=0)
+        deleteDriveLabel = tk.Label(self, text="Delete a drive", font=MEDIUM_FONT)
+        deleteDriveLabel.grid(row=1, column=2, columnspan=2)
         
+        mapDriveLabel = tk.Label(self, text="Map a drive", font=MEDIUM_FONT)
+        mapDriveLabel.grid(row=1, column=0, columnspan=2)
+
+        chooseDriveDelLabel = tk.Label(self, text="Choose Drive:", font=MEDIUM_FONT)
+        chooseDriveDelLabel.grid(row=2, column=2)
+
+        deleteDriveButton= tk.Button(self, text="DELETE!!", command=self.deleteDrive, font=MEDIUM_FONT, padx=5,pady=5,bg='#b3001b', fg='white', wraplength=200)
+        deleteDriveButton.grid(row=3, column=2, columnspan = 2)
+
+        CreateDriveButton= tk.Button(self, text="MAP!", command=self.mapDrive, font=MEDIUM_FONT, padx=5,pady=5,bg='#b3001b', fg='white', wraplength=200)
+        CreateDriveButton.grid(row=3, column=0, columnspan=2)
+
+        diskInfo = tk.Button(self, text='Details for Drives', command=self.diskInfo, font=LARGE_FONT, bg='#b3001b', fg='white', wraplength=200)
+        diskInfo.grid(row=4, columnspan=4)
+
+        self.disk = tk.Label(self, text = "", wraplength=600, font=SMALL_FONT)
+        self.disk.grid(row=5,  columnspan=4)
+        
+        self.address = tk.Entry(self,width=40)
+        self.address.grid(row=2, column=0)
+        
+
+        ##This is for the drop down menu's for the drives
         optionList = MapDrive.listAvailableDrives()
-        self.v = tk.StringVar()
+        self.v = tk.StringVar(parent)
         self.v.set(optionList[0])
         self.om = tk.OptionMenu(self,self.v,*optionList)
-        self.om.grid(row=1,column=1)
+        self.om.grid(row=2,column=1, sticky='W')
 
-
-        
         deleteList = MapDrive.findMappedDrives()
-        self.v1 = tk.StringVar()
+        self.v1 = tk.StringVar(parent)
         self.v1.set(deleteList[0])
         self.om1 = tk.OptionMenu(self,self.v1,*deleteList)
-        self.om1.grid(row=1,column=2)
+        self.om1.grid(row=2,column=3)
         
+    ##################### Functions to go with the buttons #########################
+    def mapDrive(self):
+        driveToMap = self.v.get()
+        addressOfDrive = self.address.get()
+        os.system('net use ' + driveToMap + ' ' + addressOfDrive)
+        MapDrive.reset(self)
+        self.address.delete(0,END)
+        #print('net use ' + driveToMap + ' ' + addressOfDrive)
 
+    def deleteDrive(self):
+        driveToDelete = self.v1.get()
+        os.system('net use ' + driveToDelete + ' /delete')
+        #print('net use ' + driveToDelete + ' /delete')
+        MapDrive.reset(self)
+        
     def findMappedDrives():
         os.system('fsutil fsinfo drives> "C:\\Users\\Public\\drives.txt"')
         findDrives = open('C:\\Users\\Public\\drives.txt', 'r')
@@ -448,11 +480,33 @@ class MapDrive(tk.Frame):
 
         return allLetterDrives
 
-    def mapDrive(self):
-        available = MapDrive.listAvailableDrives()
-        print(available)
+    def reset(self):
+        optionList = []
+        deleteList = []
+        self.om.children['menu'].delete(0,"end")
+        self.om1.children['menu'].delete(0,"end")
+        optionList = MapDrive.listAvailableDrives()
+        deleteList = MapDrive.findMappedDrives()
+        
+        for ava in optionList:
+            self.om.children['menu'].add_command(label=ava, command= lambda ma=ava: self.v.set(ma))
+        self.v.set(optionList[0])
+        
+        for use in deleteList:
+            self.om1.children['menu'].add_command(label=use, command= lambda u=use: self.v1.set(u))
+        self.v1.set(deleteList[0])
 
-    
+    def diskInfo(self):
+        os.system('wmic logicaldisk get caption,description,drivetype,providername,volumename>"C:\\Users\\Public\\drivesInfo.txt"')
+        info = open('C:\\Users\\Public\\drivesInfo.txt', 'r')
+        infoRe = info.read()
+        self.disk.config(text=infoRe)
+        print(infoRe)
+        info.close()
+        drive_clean = 'DEL ' + 'C:\\Users\\Public\\drivesInfo.txt'
+        os.system(drive_clean)
+        
+        
 
 #Continuously has gui up.
 
