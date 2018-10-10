@@ -22,7 +22,7 @@ class AJsUtilities(tk.Tk):
         tk.Tk.__init__(self, *args, **kwargs)
 
         tk.Tk.iconbitmap(self, default="A.ico")
-        tk.Tk.wm_title(self, "Aaron's Utilities V0.8.2")
+        tk.Tk.wm_title(self, "Aaron's Utilities V0.9.2.1")
         
         container = tk.Frame(self,bg='#262626')
         container.pack(side="top", fill="both", expand = True)
@@ -393,10 +393,10 @@ class MapDrive(tk.Frame):
         tk.Frame.__init__(self,parent)
 
         description = tk.Label(self, text="Choose to either map a drive or delete a mapped drive.", font=LARGE_FONT, wraplength=600)
-        description.grid(row=0, column=0, columnspan=4, padx = (55,0))
+        description.grid(row=0, column=0, columnspan=4, padx = (55,0), pady=(10,10))
 
         returnButton = tk.Button(self,text="Back to Options",width=26, height=5, font=MEDIUM_FONT, padx=5,pady=5,bg='#b3001b', fg='white', wraplength=200, command=lambda: controller.show_frame(AJsUtilitiesButtons))
-        returnButton.grid(row=8,column=0,padx=12,pady=(120,50))
+        returnButton.grid(row=8,column=0,padx=12,pady=(20,50))
 
         deleteDriveLabel = tk.Label(self, text="Delete a drive", font=MEDIUM_FONT)
         deleteDriveLabel.grid(row=1, column=2, columnspan=2)
@@ -414,10 +414,19 @@ class MapDrive(tk.Frame):
         CreateDriveButton.grid(row=3, column=0, columnspan=2)
 
         diskInfo = tk.Button(self, text='Details for Drives', command=self.diskInfo, font=LARGE_FONT, bg='#b3001b', fg='white', wraplength=200)
-        diskInfo.grid(row=4, columnspan=4)
+        diskInfo.grid(row=4, columnspan=4, pady=(10,0), padx=(60,0))
 
-        self.disk = tk.Label(self, text = "", wraplength=600, font=SMALL_FONT)
-        self.disk.grid(row=5,  columnspan=4)
+        scrollbarx = Scrollbar(self, width = 16)
+        scrollbarx.grid(row=6, column = 0, columnspan=4,sticky='N', padx=(70,0), pady=(0,20))
+
+        scrollbary = Scrollbar(self, width = 16)
+        scrollbary.grid(row=5, column = 3, pady=(20,20),sticky='W')
+        
+        self.resultsDrive = tk.Listbox(self, xscrollcommand=scrollbarx.set, yscrollcommand=scrollbary.set, width=55,height=15)
+        self.resultsDrive.grid(row=5, column=0, padx=(125,0), pady=(20,0), columnspan=3)
+
+        scrollbarx.config(command = self.resultsDrive.xview, orient=HORIZONTAL)
+        scrollbary.config(command = self.resultsDrive.yview)
         
         self.address = tk.Entry(self,width=40)
         self.address.grid(row=2, column=0)
@@ -497,12 +506,13 @@ class MapDrive(tk.Frame):
         self.v1.set(deleteList[0])
 
     def diskInfo(self):
-        os.system('wmic logicaldisk get caption,description,drivetype,providername,volumename>"C:\\Users\\Public\\drivesInfo.txt"')
-        info = open('C:\\Users\\Public\\drivesInfo.txt', 'r')
-        infoRe = info.read()
-        self.disk.config(text=infoRe)
-        print(infoRe)
-        info.close()
+        os.system('wmic logicaldisk get caption,description,providername>"C:\\Users\\Public\\drivesInfo.txt"')
+        with open('C:\\Users\\Public\\drivesInfo.txt', 'r') as driveInfo:
+            self.resultsDrive.delete(0,END)
+            for line in driveInfo:
+                self.resultsDrive.insert(END, line)
+
+        #### Clean up text files by deleting them
         drive_clean = 'DEL ' + 'C:\\Users\\Public\\drivesInfo.txt'
         os.system(drive_clean)
         
