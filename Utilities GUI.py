@@ -31,7 +31,7 @@ class AJsUtilities(tk.Tk):
 
         self.frames = {}
 
-        for F in (WelcomeScreen,AJsUtilitiesButtons,FirewallOptions, NetworkTests,PowerOptions, AllowUpdates, IPConfig, MapDrive): 
+        for F in (WelcomeScreen,AJsUtilitiesButtons,FirewallOptions, NetworkTests,PowerOptions, AllowUpdates, IPConfig, MapDrive, ChangeCompInfo): 
             frame = F(container, self) 
             self.frames[F] = frame  
             frame.grid(row=0,column=0,sticky="nsew")
@@ -85,6 +85,9 @@ class AJsUtilitiesButtons(tk.Frame):
 
         mapDrive = tk.Button(self, text="Map Drives",width=26, height=5, font=LARGE_FONT, padx=5,pady=5, bg='#b3001b', fg='white',command=lambda: controller.show_frame(MapDrive))
         mapDrive.grid(row=2,column=1,padx=12,pady=5)
+
+        changeCompInfo = tk.Button(self, text="Change Name and Connect to Domain",wraplength=200, width=26, height=5, font=LARGE_FONT, padx=5,pady=5, bg='#b3001b', fg='white',command=lambda: controller.show_frame(ChangeCompInfo))
+        changeCompInfo.grid(row=3,column=0,padx=12,pady=5)
 
 
 ##################################### Class for the firewall activation and deactivation #####################################################
@@ -516,7 +519,75 @@ class MapDrive(tk.Frame):
         drive_clean = 'DEL ' + 'C:\\Users\\Public\\drivesInfo.txt'
         os.system(drive_clean)
         
+################################### Rename Computer and Connect to Domain ##################################################################################
+class ChangeCompInfo(tk.Frame):
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self,parent)
+
+        newNameLabel = tk.Label(self, text="Enter the name you would like to change this computer to below:", font=LARGE_FONT, wraplength=400)
+        newNameLabel.grid(row=0, column=0, padx = (55,0), pady=(10,10), columnspan=2)
         
+        self.newNameDom = tk.Entry(self,width=20)
+        self.newNameDom.grid(row=1, column=0)
+
+        self.domainName = tk.Entry(self,width=20)
+        self.domainName.grid(row=2, column=0)
+
+        self.userNameDom = tk.Entry(self,width=20)
+        self.userNameDom.grid(row=2, column=1)
+
+        addToDomain = tk.Button(self,text="Add to Domain", width=26, height=5, font=LARGE_FONT, padx=5,pady=5,bg='#b3001b', fg='white', command=self.joinDomain)
+        addToDomain.grid(row=3,column=0,padx=12,pady=5)
+
+        renameOnDom = tk.Button(self, text="Rename Computer on a Domain",width=26, height=5, font=LARGE_FONT, padx=5,pady=5, bg='#b3001b', fg='white',command=self.renameOnDomain)
+        renameOnDom.grid(row=3,column=1,padx=12,pady=5)
+
+        renameLoc = tk.Button(self, text="Rename Computer",width=26, height=5, font=LARGE_FONT, padx=5,pady=5, bg='#b3001b', fg='white',command=self.renameLocal)
+        renameLoc.grid(row=4,column=0,padx=12,pady=5)
+
+        renameAndJoin = tk.Button(self, text="Rename Computer and Join Domain",width=26, height=5, font=LARGE_FONT, padx=5,pady=5, bg='#b3001b', fg='white',command=self.renameAndJoinDomain)
+        renameAndJoin.grid(row=4,column=1,padx=12,pady=5)
+
+        returnButton = tk.Button(self,text="Back to Options",width=26, height=5, font=MEDIUM_FONT, padx=5,pady=5,bg='#b3001b', fg='white', wraplength=200, command=lambda: controller.show_frame(AJsUtilitiesButtons))
+        returnButton.grid(row=8,column=0,padx=12,pady=(120,50))
+
+    def renameOnDomain(self):
+        newN = self.newNameDom.get()
+        domain = self.domainName.get()
+        user = self.userNameDom.get()
+        hostName = ChangeCompInfo.makeHost()
+        reNameCommand = "Rename-computer –computername “" +hostName+ "” –newname “" + newN + r"” –domaincredential" +domain+ r"\"" +user+ "–force –restart"
+        ChangeCompInfo.cleanUp()
+
+    def renameLocal(self):
+        hostName = ChangeCompInfo.makeHost()
+        newN = self.newNameDom.get()
+        os.system(r"WMIC computersystem where caption='" +hostName+ r"' rename " +newN)
+        ChangeCompInfo.cleanUp()
+        
+    def renameAndJoinDomain(self):
+        hostName = ChangeCompInfo.makeHost()
+        newN = self.newNameDom.get()
+        domain = self.domainName.get()
+        user = self.userNameDom.get()
+        os.system('Add-Computer -ComputerName "'+ hostName +'" -Domain "' +hostName+ '" -NewName "' +newN+ '" -Credential Domain02\Admin01 -Restart')
+        ChangeCompInfo.cleanUp()
+
+    def joinDomain(self):
+        domain = self.domainName.get()
+        user = self.userNameDom.get()
+        os.system("Add-Computer -DomainName “" +domain+ "“ -Server “"+domain+ r"\"" +user+"“ -Passthru -Verbose")
+        
+    def makeHost():
+        os.system('hostname>"C:\\Users\\Public\\hostname.txt"')
+        hostOpen = open('C:\\Users\\Public\\hostname.txt')
+        hostName = hostOpen.read()
+        return hostName
+    
+    def cleanUp():
+        #### Clean up text files by deleting them
+        drive_clean = 'DEL ' + 'C:\\Users\\Public\\hostname.txt'
+        os.system(drive_clean)
 
 #Continuously has gui up.
 
